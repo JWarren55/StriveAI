@@ -3,6 +3,9 @@ from sentence_transformers import SentenceTransformer
 
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
+## Top K retrieval 
+K = 3
+
 def cosine_similarity(a, b):
     ## magnitude of A and B
     mag_a = np.linalg.norm(a)
@@ -30,14 +33,14 @@ embeddings = model.encode(sentences)
 
 q_embeddings = model.encode(question)
 
-closes_sentence_index = 0
-highest_similarity = float("-inf")
+similarities = []
 
-for index, emb in enumerate(embeddings):
-    similarity = cosine_similarity(q_embeddings, emb)
+## Get the similarities to sentence from the question
+for emb in embeddings:
+    similarities.append(cosine_similarity(q_embeddings, emb))
     
-    if highest_similarity < similarity:
-        highest_similarity = similarity
-        closes_sentence_index = index
-  
-print(sentences[closes_sentence_index])
+## sort index from most to least similar
+ranked_indices = np.argsort(similarities)[::-1]
+
+for i in ranked_indices:
+    print(str(i) + ": " + sentences[i])
